@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div id="signinButton">
+<span class="g-signin"
+      data-scope="openid email"
+      data-clientid="442410577685-lela4tk7e3lqsl47g45u7dlhrgjuieeh.apps.googleusercontent.com"
+      data-redirecturi="/"
+      data-accesstype="offline"
+      data-cookiepolicy="single_host_origin"
+      data-callback="signInCallBack"
+      data-approvalprompt="force">
+</span>
+</div>
+
+<div id="result"></div>
+
+<script>
+    function signInCallBack(authResult) {
+        if(authResult['code']){
+
+            $('#signinButton').attr('style', 'display:none');
+
+        console.log(authResult['code']);
+            $.ajax({
+                type: 'POST',
+                url: '/gconnect?state={{ STATE }}',
+                processData: false,
+                data: authResult['code'],
+                contentType:'application/octet-stream; charset=utf-8',
+                success: function (result) {
+
+                    if(result){
+                        $('#result').html('Login Successful '+result);
+                        setTimeout(function () {
+                            window.location.href = "/";
+                        },4000)
+
+                    }else if(authResult['error']){
+                        console.log('Error on response '+authResult['error'])
+                    }else{
+                        $('#result').html('server request failed');
+                    }
+                }
+
+            })
+
+        }
+    }
+</script>
+{% endblock %}

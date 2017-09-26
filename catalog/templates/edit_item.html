@@ -1,0 +1,8 @@
+<div>
+    <h2>category {{category.name}}</h2>
+    <form action="{{ url_for("edit_item", cat_id=category.id, item_id=item.id) }}" method="post">
+        <label>Item name</label><input type="text" name="name" value="{{item.name}}"/> 
+        <label>Item description</label><textarea type="text" name="description">{{item.description}}</textarea> 
+        <button type="submit">Save</button> 
+    </form>
+</div>
