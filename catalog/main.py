@@ -14,7 +14,7 @@ from oauth2client.client import flow_from_clientsecrets
 from werkzeug.utils import secure_filename
 
 from catalog import app
-from catalog.model.user import User
+from model.user import User
 from db_setup import *
 
 CLIENT_ID = json.loads(
