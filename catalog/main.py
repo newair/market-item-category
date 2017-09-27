@@ -142,7 +142,6 @@ def gconnect():
     login_session['picture'] = data['picture']
     login_session['user_id'] = data['id']
     login_session['email'] = data['email']
-    print 'users id',login_session['user_id']
     user = session.query(User).filter_by(id=login_session['user_id']).first()
 
     # if user not available create it
@@ -160,7 +159,6 @@ def gconnect():
     output += login_session['picture']
     output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
     flash("you are now logged in as %s" % login_session['username'])
-    print "done!"
     return output
 
 
@@ -191,7 +189,6 @@ def verify_access_token(access_token):
 
 
 def revoke_access_token(access_token):
-    print access_token
     url = ("https://accounts.google.com/o/oauth2/revoke?token=%s" % access_token)
     h = httplib2.Http()
     response = h.request(url, 'GET')
@@ -201,7 +198,6 @@ def revoke_access_token(access_token):
 @app.route('/gdisconnect')
 def gdisconnect():
     access_token = login_session.get('access_token')
-    print access_token
     if access_token is None:
         return prepare_invalid_login_status('User credentials saved in session is empty')
     results = revoke_access_token(access_token)
