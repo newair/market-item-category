@@ -400,4 +400,3 @@ def all_items_and_categories():
         return jsonify([category.serialize for category in categories])
     else:
         return jsonify({})
-
