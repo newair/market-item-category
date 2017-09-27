@@ -131,7 +131,6 @@ def gconnect():
     # Saving access_token and gplus_id
     login_session['access_token'] = credentials.access_token
     login_session['gplus_id'] = gplus_id
-    print login_session['access_token']
     # Get user info
     userinfo_url = "https://www.googleapis.com/oauth2/v2/userinfo"
     params = {'access_token': credentials.access_token, 'alt': 'json'}
