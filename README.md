@@ -19,8 +19,9 @@ This project contains source code for item caltalog project which implements CRU
 ## How to Run
 
 * Install Oracle Virtual Box
-* Install Vangrant and put vagrant up
-* Run the command 'python app.py
+* Install Vagrant and put vagrant up in the project
+* put vagrant ssh and navigate to project root which is in vagrant directory
+* Run the command python app.py
 * To create your own client_secret.json follow the Create client.json
 * Existing database is named itemcatalog.db. If you want to set up new db follow the Setup DB
 
