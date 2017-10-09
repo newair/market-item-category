@@ -14,6 +14,8 @@ from oauth2client.client import flow_from_clientsecrets
 from werkzeug.utils import secure_filename
 
 from catalog import app
+from catalog.model.category import Category
+from catalog.model.item import Item
 from model.user import User
 from db_setup import *
 
@@ -21,15 +23,19 @@ CLIENT_ID = json.loads(
     open('client_secret.json', 'r').read())['web']['client_id']
 APPLICATION_NAME = "Item Catalog"
 
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 IMAGE_FOLDER = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'])
 
 
 def generate_random_state():
-    return ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
+    """Generate random state string in order to be used in every login"""
+    return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in xrange(32))
 
 
 def render_template_with_session(template, **params):
+    """This method will be called each time when rendering a new template.
+        Other relevant information are also passed with it.
+    """
     if params is not None:
         if 'categories' not in params:
             params['categories'] = session.query(Category)
@@ -49,29 +55,39 @@ def render_template_with_session(template, **params):
 
 
 def redirect_to_first_available_category():
+    """This will redirect to first category page"""
     return redirect('/'+str(session.query(Category).first().id))
 
 
 def allowed_file(filename):
+    """Checks whether uploaded files contains valid extensions"""
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def save_image(request):
-    if 'file' not in request.files:
+def save_image(image_save_request):
+    """This will save the file mentioned in the request in the UPLOAD_FOLDER
+        specified in the app config. Relevant warnings will be dispatched when the
+        file name is not specified
+    """
+    if 'file' not in image_save_request.files:
         flash('No file part')
-        return redirect(request.url)
-    file = request.files['file']
+        return redirect(image_save_request.url)
+    file = image_save_request.files['file']
 
-    # if user does not select file, browser also
-    # submit a empty part without filename
+    # Check emptiness of the file
     if file.filename == '':
         flash('No selected file')
-        return redirect(request.url)
+        return redirect(image_save_request.url)
+    # Check file is allowed
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         file.save(os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename))
+    else:
+        flash('Invalid File')
+        return redirect(image_save_request.url)
     return filename
+
 
 @app.route('/')
 @app.route('/<int:cat_id>')
@@ -79,6 +95,7 @@ def index(cat_id=None):
     """This is the root of the application"""
     main_categories = session.query(Category)
     if main_categories.count() > 0:
+        # If cat_id is not available redirect to 1st category available
         if cat_id:
             # Fetch the content according to the id
             sub_items = session.query(Item).filter_by(cat_id=cat_id)
@@ -93,18 +110,24 @@ def index(cat_id=None):
     else:
         return render_template_with_session("index.html")
 
+
 @app.route('/uploads/<path:image_name>')
 def item_image_path(image_name):
+    """This will return the path of the image which is inside the IMAGE_FOLDER"""
     return send_from_directory(IMAGE_FOLDER, image_name, as_attachment=True)
+
 
 @app.route('/login')
 def show_login():
+    """This will render the login.html with the generated state string"""
     state = generate_random_state()
     login_session['state'] = state
     return render_template_with_session('login.html', STATE=state)
 
+
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
+    """This is the login point of the application"""
 
     # Checking whether response received from the form the client requested
     if request.args.get('state') != login_session['state']:
@@ -142,7 +165,8 @@ def gconnect():
     stored_gplus_id = login_session.get('gplus_id')
 
     # Checking whether  saved token is same as that is obtained from credentials object
-    if stored_access_token is not None and stored_access_token == credentials.access_token and gplus_id == stored_gplus_id:
+    if stored_access_token is not None and stored_access_token == credentials.access_token \
+            and gplus_id == stored_gplus_id:
         return prepare_successful_status('User is already connected ')
 
     # Saving access_token and gplus_id
@@ -176,18 +200,21 @@ def gconnect():
 
 
 def prepare_invalid_login_status(message):
+    """This will prepare Invalid login status message"""
     response = make_response(json.dumps(message), 401)
     response.headers['Content-Type'] = 'application/json'
     return response
 
 
 def prepare_successful_status(message):
+    """This will prepare Success login status message"""
     response = make_response(json.dumps(message), 200)
     response.headers['Content-Type'] = 'application/json'
     return response
 
 
 def get_credentials_object(code):
+    """This will generate credentials object from the client_secret.json"""
     oauth_flow = flow_from_clientsecrets('client_secret.json', scope='')
     oauth_flow.redirect_uri = "postmessage"
     credentials = oauth_flow.step2_exchange(code)
@@ -195,6 +222,7 @@ def get_credentials_object(code):
 
 
 def verify_access_token(access_token):
+    """Verify the access_token with google servers and return the result"""
     url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'
            % access_token)
     h = httplib2.Http()
@@ -202,6 +230,7 @@ def verify_access_token(access_token):
 
 
 def revoke_access_token(access_token):
+    """Revoke the access token that is already registered in google servers"""
     url = ("https://accounts.google.com/o/oauth2/revoke?token=%s" % access_token)
     h = httplib2.Http()
     response = h.request(url, 'GET')
@@ -210,12 +239,14 @@ def revoke_access_token(access_token):
 
 @app.route('/gdisconnect')
 def gdisconnect():
+    """This is the logout function of the application. This will clear the login session
+        after revoking the access and return the relevant status message"""
     access_token = login_session.get('access_token')
     if access_token is None:
         return prepare_invalid_login_status('User credentials saved in session is empty')
     results = revoke_access_token(access_token)
 
-# Clear all login_session variables if revocation is successful on google servers
+    # Clear all login_session variables if revocation is successful on google servers
     if results['status'] == '200':
         login_session.clear()
 
@@ -226,6 +257,8 @@ def gdisconnect():
 
 
 def login_required(f):
+    """This the annotation to check whether the user is authenticated in order to use
+        specific functionality"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'username' not in login_session:
@@ -285,11 +318,10 @@ def edit_item(cat_id, item_id):
         return redirect("/")
 
 
-@app.route('/delete_item/<int:item_id>',methods=['GET', 'POST'])
+@app.route('/delete_item/<int:item_id>', methods=['GET', 'POST'])
 @login_required
 def delete_item(item_id):
     """This route will delete an item"""
-
     if item_id:
         item = session.query(Item).filter_by(id=item_id).first()
 

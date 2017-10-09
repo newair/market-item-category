@@ -1,3 +1,5 @@
+{# This is the template file for the index file. This will contain all the content other than
+layout navbar#}
 {% extends "layout.html" %}
 
 {% block content %}
@@ -6,7 +8,7 @@
         <a href="{{ url_for("add_item", cat_id=selected_category.id) }}"> Add Item</a>
     {% endif %}
     <div>
-        <!--Items are displayed  -->
+        <!--Items are displayed batch wise 3 for each row  -->
         {% for itemRow in items | batch(3) -%}
 
             <div class="row align-items-center">

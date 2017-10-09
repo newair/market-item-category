@@ -1,10 +1,12 @@
+{# This is the template file to delete categories. Once deleted will be navigated back#}
 {% extends "layout.html" %}
 
 {% block content %}
-<p>Are you sure you want to delete {{ category.name }} and its items?</p>
-<form method="post">
-     <input name="id" type="hidden" value="{{ category.id }}" value="DELETE" />
-     <input type="submit"/> <button onclick="window.history.go(-1); return false;"> Cancel</button>
- </form>
+    <p>Are you sure you want to delete {{ category.name }} and its items?</p>
+    <form method="post">
+        <input name="id" type="hidden" value="{{ category.id }}" value="DELETE"/>
+        <input type="submit"/>
+        <button onclick="window.history.go(-1); return false;"> Cancel</button>
+    </form>
 
 {% endblock %}

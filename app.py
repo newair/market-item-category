@@ -1,3 +1,6 @@
+# This file is the main file that needs to be run with the command python. This will run the
+# main file as well as start the server for the given configuration
+
 from catalog import app
 from catalog import main
 

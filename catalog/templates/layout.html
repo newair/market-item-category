@@ -1,6 +1,9 @@
+{# This is the main laout html which is displayed on top in each page after logged in#}
+
 {% extends "base.html" %}
 
 {% block main %}
+    {# These are the set of flash messages that are displayed in case of a warning or error#}
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             <ul>
@@ -11,79 +14,87 @@
         {% endif %}
     {% endwith %}
 
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="/">Item Catalog</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
-                    aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNavDropdown">
-                <ul class="navbar-nav">
-                    {% for category in categories[:2] %}
-                        <li  {% if( selected_category is not none and selected_category.id == category.id ) %}
-                            class="navbar-nav active" {% else %} class="navbar-nav" {% endif %} ><a class="nav-link"
-                                                                                                    href={{ url_for("index",cat_id=category.id) }}>{{ category.name }}</a>
-                        </li>
-                    {% endfor %}
+    {#This the bootstrap nav bar component which holds all menu items and category settings with
+    sign in button#}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="/">Item Catalog</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
+                aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
 
-                    {% if categories|length >2 %}
+            {# Menu Set#}
+            <ul class="navbar-nav">
+                {# Displays only few menus. Rest will be displayed in more drop down#}
+                {% for category in categories[:2] %}
+                    <li  {% if( selected_category is not none and selected_category.id == category.id ) %}
+                        class="navbar-nav active" {% else %} class="navbar-nav" {% endif %} ><a class="nav-link"
+                                                                                                href={{ url_for("index",cat_id=category.id) }}>{{ category.name }}</a>
+                    </li>
+                {% endfor %}
 
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink"
-                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                More
+                {#More drop down#}
+                {% if categories|length >2 %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            More
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+
+                            {% for category in categories[2:] %}
+                                <a class="dropdown-item"
+                                   href={{ url_for("index",cat_id=category.id) }}>{{ category.name }}</a>
+                            {% endfor %}
+
+                        </div>
+                    </li>
+                {% endif %}
+            </ul>
+            <ul class="navbar-nav ml-auto justify-content-between">
+                <li class="nav-item mr-sm-2 ">
+                    {% if selected_category %}
+                        <div class="dropdown show">
+                            <a class="btn btn-secondary dropdown-toggle btn-sm" href="#" role="button"
+                               id="dropdownMenuLink"
+                               data-toggle="dropdown"
+                               aria-haspopup="true" aria-expanded="false">
+                                Category Settings
+                            </a>
+
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                <a class="dropdown-item" href="{{ url_for("add_category") }}">New Category</a>
+                                <a class="dropdown-item"
+                                   href={{ url_for("edit_category",cat_id=selected_category.id) }}>Edit
+                                    Category</a>
+                                <a class="dropdown-item"
+                                   href={{ url_for("delete_category",cat_id=selected_category.id) }}>Delete
+                                    Category</a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </li>
+
+                {#User settings panel#}
+                <li class="nav-item">
+
+                    {#Display logout button if logged in#}
+                    {% if 'username' in login_session %}
+                        <div class="nav-item dropdown">
+
+                            <a class="nav-link dropdown-toggle" data-toggle="dropdown">
+                                <img src="{{ login_session.picture }}" class="rounded-circle" width="30px"
+                                     height="30px"/>
                             </a>
                             <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-
-                                {% for category in categories[2:] %}
-                                    <a class="dropdown-item"
-                                       href={{ url_for("index",cat_id=category.id) }}>{{ category.name }}</a>
-                                {% endfor %}
-
+                                <a class="dropdown-item" href="{{ url_for("gdisconnect") }}">Logout</a>
                             </div>
-                        </li>
-                    {% endif %}
-                </ul>
-                <ul class="navbar-nav ml-auto justify-content-between">
-                    <li class="nav-item mr-sm-2 ">
-                        {% if selected_category %}
-                            <div class="dropdown show">
-                                <a class="btn btn-secondary dropdown-toggle btn-sm" href="#" role="button"
-                                   id="dropdownMenuLink"
-                                   data-toggle="dropdown"
-                                   aria-haspopup="true" aria-expanded="false">
-                                    Category Settings
-                                </a>
+                        </div>
 
-                                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                                    <a class="dropdown-item" href="{{ url_for("add_category") }}">New Category</a>
-                                    <a class="dropdown-item"
-                                       href={{ url_for("edit_category",cat_id=selected_category.id) }}>Edit
-                                        Category</a>
-                                    <a class="dropdown-item"
-                                       href={{ url_for("delete_category",cat_id=selected_category.id) }}>Delete
-                                        Category</a>
-                                </div>
-                            </div>
-                        {% endif %}
-                    </li>
-                    <li class="nav-item">
-
-                        {% if 'username' in login_session %}
-                            <div class="nav-item dropdown">
-
-                                <a class="nav-link dropdown-toggle" data-toggle="dropdown">
-                                    <img src="{{ login_session.picture }}" class="rounded-circle" width="30px"
-                                         height="30px"/>
-                                </a>
-                                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                                    <a class="dropdown-item" href="{{ url_for("gdisconnect") }}">Logout</a>
-                                </div>
-                            </div>
-
-                        {% else %}
-
-                            <div class="nav-item">
+                    {% else %}
+                        {# Else display sign in button#}
+                        <div class="nav-item">
                                 <span class="g-signin"
                                       data-scope="openid email"
                                       data-clientid="442410577685-lela4tk7e3lqsl47g45u7dlhrgjuieeh.apps.googleusercontent.com"
@@ -93,16 +104,14 @@
                                       data-callback="signInCallBack"
                                       data-approvalprompt="force">
                                 </span>
-                            </div>
-                        {% endif %}
-                    </li>
-                </ul>
-            </div>
-        </nav>
+                        </div>
+                    {% endif %}
+                </li>
+            </ul>
+        </div>
+    </nav>
 
-        {% block content %}
-        {% endblock %}
-
-
+    {% block content %}
+    {% endblock %}
 
 {% endblock %}

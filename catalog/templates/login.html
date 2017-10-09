@@ -1,17 +1,18 @@
+{# This is the template file for login page#}
 {% extends "base.html" %}
 
 {% block main %}
-<div id="signinButton">
-<span class="g-signin"
-      data-scope="openid email"
-      data-clientid="442410577685-lela4tk7e3lqsl47g45u7dlhrgjuieeh.apps.googleusercontent.com"
-      data-redirecturi="/"
-      data-accesstype="offline"
-      data-cookiepolicy="single_host_origin"
-      data-callback="signInCallBack"
-      data-approvalprompt="force">
-</span>
-</div>
+    <div id="signinButton">
+    <span class="g-signin"
+          data-scope="openid email"
+          data-clientid="442410577685-lela4tk7e3lqsl47g45u7dlhrgjuieeh.apps.googleusercontent.com"
+          data-redirecturi="/"
+          data-accesstype="offline"
+          data-cookiepolicy="single_host_origin"
+          data-callback="signInCallBack"
+          data-approvalprompt="force">
+    </span>
+    </div>
 
-<div id="result"></div>
+    <div id="result"></div>
 {% endblock %}

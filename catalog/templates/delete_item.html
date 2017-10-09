@@ -1,4 +1,6 @@
- <form action="{{ url_for("delete_item",item_id=item.id) }}" method="post">
-        <p>Are you sure you want to delete? {{ item.name }}</p>
-        <button type="submit">Ok</button> <button onclick="window.history.go(-1); return false;"> Cancel</button>
-    </form>
+{# This is the template file to delete items. Once deleted will be navigated back#}
+<form action="{{ url_for("delete_item",item_id=item.id) }}" method="post">
+    <p>Are you sure you want to delete? {{ item.name }}</p>
+    <button type="submit">Ok</button>
+    <button onclick="window.history.go(-1); return false;"> Cancel</button>
+</form>

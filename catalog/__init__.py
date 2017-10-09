@@ -1,3 +1,5 @@
+# This fill will be executed once the module is configured. It setup the basic configuration
+# settings and secret key
 from flask import Flask
 
 UPLOAD_FOLDER = 'uploads'

@@ -1,3 +1,4 @@
+{#This is the base html which contains all library files and client side auth logics#}
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -6,17 +7,15 @@
     <script src="{{ url_for('static', filename='js/lib/popper.min.js') }}" type="application/javascript"></script>
     <script src=" {{ url_for('static', filename='js/lib/bootstrap.min.js') }}"></script>
     <link rel="stylesheet" type="text/css" href=" {{ url_for('static', filename='css/bootstrap.css') }}">
-
 </head>
-
 <body>
 <script>
     function signInCallBack(authResult) {
         if (authResult['code']) {
 
             $('#signinButton').attr('style', 'display:none');
-
-            console.log(authResult['code']);
+            // This auth call will fatch the login response from server which is authenticated
+            // with google servers
             $.ajax({
                 type: 'POST',
                 url: '/gconnect?state={{ STATE }}',
@@ -26,16 +25,16 @@
                 success: function (result) {
 
                     if (result) {
-                        //$('#result').html('Login Successful ' + result);
+                        //Once the results are available, set the values in modal dialog
                         var logginSuccessModal = $('#Login-Success');
-                        logginSuccessModal.find('#loginSuccessUsername').html(result.username?result.username:result.email);
+                        logginSuccessModal.find('#loginSuccessUsername').html(result.username ? result.username : result.email);
                         logginSuccessModal.find('#loginSuccessPicture').attr('src', result.picture);
-                       $('#Login-Success').modal('toggle');
+                        logginSuccessModal.modal('toggle');
 
+                        //after 4 seconds, redirect to root
                         setTimeout(function () {
-                            //window.location.href = "/";
+                            window.location.href = "/";
                         }, 4000)
-
 
                     } else if (authResult['error']) {
                         console.log('Error on response ' + authResult['error'])
@@ -51,24 +50,25 @@
     }
 </script>
 <div class="container">
+
+    {#This is the main block which should be fille by all tamplates#}
     {% block main %}
     {% endblock %}
 
-
-<div id="Login-Success" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog"
-     aria-labelledby="myLargeModalLabel" aria-hidden="true" >
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="row justify-content-between align-items-center" style="height: 80px;">
-                <span class="col-lg-9">Welcome <span id="loginSuccessUsername"></span></span>
-                <span class="col-lg-3 ml-auto"><img id="loginSuccessPicture" class="rounded-circle float-right" src="" width="50px" height="50px" alt="Profile Not Available"/></span>
+    {#This is modal dialog which is displayed upon successful authentication#}
+    <div id="Login-Success" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog"
+         aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="row justify-content-between align-items-center" style="height: 80px;">
+                    <span class="col-lg-9">Welcome <span id="loginSuccessUsername"></span></span>
+                    <span class="col-lg-3 ml-auto"><img id="loginSuccessPicture" class="rounded-circle float-right"
+                                                        src="" width="50px" height="50px" alt="Profile Not Available"/></span>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 </div>
-
-
 </body>
 </html>
