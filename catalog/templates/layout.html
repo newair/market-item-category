@@ -1,39 +1,108 @@
-<html>
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-    <script src="//apis.google.com/js/platform.js?onload=start"> </script>
-    <script src=" {{ url_for('static', filename='js/jquery-3.2.1.min.js') }}" ></script>
+{% extends "base.html" %}
 
-    <script src=" {{ url_for('static', filename='js/bootstrap.min.js') }}"> </script>
-    <link rel="stylesheet" type="text/css" href=" {{ url_for('static', filename='css/bootstrap.css') }}">
-</head>
-
-<body>
-{% with messages = get_flashed_messages() %}
-         {% if messages %}
+{% block main %}
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
             <ul>
-               {% for message in messages %}
-               <li>{{ message }}</li>
-               {% endfor %}
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
             </ul>
-         {% endif %}
-{% endwith %}
-
-<div style="background-color: red; height:30px">Header
-
-    {% if not STATE %}
-        {% if login_session is not defined or login_session.username is not defined %}
-
-            <a href="./login">Login</a>
-
-        {% else %}
-            {{ username }}<a href="./gdisconnect">Logout</a>
         {% endif %}
-    {% endif %}
-</div>
-{% block content %}
-{% endblock %}
+    {% endwith %}
 
-</body>
-</html>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="/">Item Catalog</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
+                    aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="navbar-nav">
+                    {% for category in categories[:2] %}
+                        <li  {% if( selected_category is not none and selected_category.id == category.id ) %}
+                            class="navbar-nav active" {% else %} class="navbar-nav" {% endif %} ><a class="nav-link"
+                                                                                                    href={{ url_for("index",cat_id=category.id) }}>{{ category.name }}</a>
+                        </li>
+                    {% endfor %}
+
+                    {% if categories|length >2 %}
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                More
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+
+                                {% for category in categories[2:] %}
+                                    <a class="dropdown-item"
+                                       href={{ url_for("index",cat_id=category.id) }}>{{ category.name }}</a>
+                                {% endfor %}
+
+                            </div>
+                        </li>
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav ml-auto justify-content-between">
+                    <li class="nav-item mr-sm-2 ">
+                        {% if selected_category %}
+                            <div class="dropdown show">
+                                <a class="btn btn-secondary dropdown-toggle btn-sm" href="#" role="button"
+                                   id="dropdownMenuLink"
+                                   data-toggle="dropdown"
+                                   aria-haspopup="true" aria-expanded="false">
+                                    Category Settings
+                                </a>
+
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                    <a class="dropdown-item" href="{{ url_for("add_category") }}">New Category</a>
+                                    <a class="dropdown-item"
+                                       href={{ url_for("edit_category",cat_id=selected_category.id) }}>Edit
+                                        Category</a>
+                                    <a class="dropdown-item"
+                                       href={{ url_for("delete_category",cat_id=selected_category.id) }}>Delete
+                                        Category</a>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </li>
+                    <li class="nav-item">
+
+                        {% if 'username' in login_session %}
+                            <div class="nav-item dropdown">
+
+                                <a class="nav-link dropdown-toggle" data-toggle="dropdown">
+                                    <img src="{{ login_session.picture }}" class="rounded-circle" width="30px"
+                                         height="30px"/>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                    <a class="dropdown-item" href="{{ url_for("gdisconnect") }}">Logout</a>
+                                </div>
+                            </div>
+
+                        {% else %}
+
+                            <div class="nav-item">
+                                <span class="g-signin"
+                                      data-scope="openid email"
+                                      data-clientid="442410577685-lela4tk7e3lqsl47g45u7dlhrgjuieeh.apps.googleusercontent.com"
+                                      data-redirecturi="/"
+                                      data-accesstype="offline"
+                                      data-cookiepolicy="single_host_origin"
+                                      data-callback="signInCallBack"
+                                      data-approvalprompt="force">
+                                </span>
+                            </div>
+                        {% endif %}
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        {% block content %}
+        {% endblock %}
+
+
+
+{% endblock %}

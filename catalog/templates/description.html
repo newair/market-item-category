@@ -1,5 +1,25 @@
-<h1>{{category.name}}</h1>
+{% extends "layout.html" %}
 
-<h2>{{item.name}}</h2>
+{% block content %}
 
-<article>{{item.description}}</article>
+<div class="row">
+    <div class="text-center">
+        <h1>{{ category.name }}</h1>
+    </div>
+</div>
+
+<div class="row">
+
+    <figure class="figure">
+        <img class="figure-img img-fluid rounded"
+             src="{{ url_for("item_image_path", image_name=item.image_name) }}"
+             width="100px" height="150px" alt="Image not Found"/>
+        <figcaption class="figure-caption">Item image</figcaption>
+    </figure>
+</div>
+
+<div class="row">
+    <article>{{ item.description }}</article>
+</div>
+
+{% endblock %}

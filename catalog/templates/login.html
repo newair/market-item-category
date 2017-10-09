@@ -1,6 +1,6 @@
-{% extends "layout.html" %}
+{% extends "base.html" %}
 
-{% block content %}
+{% block main %}
 <div id="signinButton">
 <span class="g-signin"
       data-scope="openid email"
@@ -14,38 +14,4 @@
 </div>
 
 <div id="result"></div>
-
-<script>
-    function signInCallBack(authResult) {
-        if(authResult['code']){
-
-            $('#signinButton').attr('style', 'display:none');
-
-        console.log(authResult['code']);
-            $.ajax({
-                type: 'POST',
-                url: '/gconnect?state={{ STATE }}',
-                processData: false,
-                data: authResult['code'],
-                contentType:'application/octet-stream; charset=utf-8',
-                success: function (result) {
-
-                    if(result){
-                        $('#result').html('Login Successful '+result);
-                        setTimeout(function () {
-                            window.location.href = "/";
-                        },4000)
-
-                    }else if(authResult['error']){
-                        console.log('Error on response '+authResult['error'])
-                    }else{
-                        $('#result').html('server request failed');
-                    }
-                }
-
-            })
-
-        }
-    }
-</script>
 {% endblock %}

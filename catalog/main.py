@@ -6,7 +6,7 @@ from functools import wraps
 import httplib2
 import os
 import requests
-from flask import make_response, jsonify
+from flask import make_response, jsonify, send_from_directory
 from flask import request, render_template, redirect, url_for, flash
 from flask import session as login_session
 from oauth2client.client import FlowExchangeError
@@ -22,10 +22,25 @@ CLIENT_ID = json.loads(
 APPLICATION_NAME = "Item Catalog"
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
+IMAGE_FOLDER = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'])
+
+
+def generate_random_state():
+    return ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
 
 
 def render_template_with_session(template, **params):
     if params is not None:
+        if 'categories' not in params:
+            params['categories'] = session.query(Category)
+
+        if 'selected_category' not in params:
+            params['selected_category'] = session.query(Category).first()
+
+        if 'STATE' not in params:
+            params['STATE'] = generate_random_state()
+            login_session['state'] = params['STATE']
+
         session_params = params
     else:
         session_params = dict()
@@ -71,20 +86,22 @@ def index(cat_id=None):
 
             if sub_items.count() == 0:
                 sub_items = dict()
-            return render_template_with_session("index.html", categories=main_categories, items=sub_items,
+            return render_template_with_session("index.html", categories=main_categories.all(), items=sub_items,
                                                 selected_category=category)
         else:
             return redirect_to_first_available_category()
     else:
         return render_template_with_session("index.html")
 
+@app.route('/uploads/<path:image_name>')
+def item_image_path(image_name):
+    return send_from_directory(IMAGE_FOLDER, image_name, as_attachment=True)
 
 @app.route('/login')
 def show_login():
-    state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
+    state = generate_random_state()
     login_session['state'] = state
     return render_template_with_session('login.html', STATE=state)
-
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
@@ -151,15 +168,11 @@ def gconnect():
         session.add(user)
         session.commit()
 
-    output = ''
-    output += '<h1>Welcome, '
-    output += login_session['username']
-    output += '!</h1>'
-    output += '<img src="'
-    output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
-    flash("you are now logged in as %s" % login_session['username'])
-    return output
+    return jsonify({
+        'username': login_session['username'],
+        'picture': login_session['picture'],
+        'email': login_session['email']
+    })
 
 
 def prepare_invalid_login_status(message):
@@ -236,7 +249,7 @@ def add_item(cat_id=None):
             name = request.form["name"]
             description = request.form["description"]
             image_name = save_image(request)
-            new_item = Item(name=name, description=description, cat_id=cat_id, user_id=login_session['user_id'])
+            new_item = Item(name=name, description=description, cat_id=cat_id, user_id=login_session['user_id'], image_name=image_name)
             session.add(new_item)
             session.commit()
             return redirect('/')

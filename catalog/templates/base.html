@@ -1,0 +1,74 @@
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src=" {{ url_for('static', filename='js/lib/jquery-3.2.1.min.js') }}"></script>
+    <script src="//apis.google.com/js/platform.js?onload=start"></script>
+    <script src="{{ url_for('static', filename='js/lib/popper.min.js') }}" type="application/javascript"></script>
+    <script src=" {{ url_for('static', filename='js/lib/bootstrap.min.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href=" {{ url_for('static', filename='css/bootstrap.css') }}">
+
+</head>
+
+<body>
+<script>
+    function signInCallBack(authResult) {
+        if (authResult['code']) {
+
+            $('#signinButton').attr('style', 'display:none');
+
+            console.log(authResult['code']);
+            $.ajax({
+                type: 'POST',
+                url: '/gconnect?state={{ STATE }}',
+                processData: false,
+                data: authResult['code'],
+                contentType: 'application/octet-stream; charset=utf-8',
+                success: function (result) {
+
+                    if (result) {
+                        //$('#result').html('Login Successful ' + result);
+                        var logginSuccessModal = $('#Login-Success');
+                        logginSuccessModal.find('#loginSuccessUsername').html(result.username?result.username:result.email);
+                        logginSuccessModal.find('#loginSuccessPicture').attr('src', result.picture);
+                       $('#Login-Success').modal('toggle');
+
+                        setTimeout(function () {
+                            //window.location.href = "/";
+                        }, 4000)
+
+
+                    } else if (authResult['error']) {
+                        console.log('Error on response ' + authResult['error'])
+                    } else {
+                        $('#result').html('server request failed');
+                    }
+
+                }
+
+            })
+
+        }
+    }
+</script>
+<div class="container">
+    {% block main %}
+    {% endblock %}
+
+
+<div id="Login-Success" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog"
+     aria-labelledby="myLargeModalLabel" aria-hidden="true" >
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="row justify-content-between align-items-center" style="height: 80px;">
+                <span class="col-lg-9">Welcome <span id="loginSuccessUsername"></span></span>
+                <span class="col-lg-3 ml-auto"><img id="loginSuccessPicture" class="rounded-circle float-right" src="" width="50px" height="50px" alt="Profile Not Available"/></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+
+</body>
+</html>
