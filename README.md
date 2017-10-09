@@ -48,3 +48,15 @@ This project contains source code for item caltalog project which implements CRU
 * /json to access all information
 * /json/category/<int:cat_id> to access category specific information
 * /json/item/<int:item_id> to access item specific information
+
+## References
+
+* Udacity Lessons
+* Random images from google search just for the demo purposes
+* Google developer console and Oauth docs
+* Assistance from Stack overflow already posted questions
+* Jinja 2 And Flask references
+* Bootstrap docs
+* Sqlite3 docs
+* SQLAlchemy docs
+* Heroku docs in order to deploy
