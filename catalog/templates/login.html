@@ -2,7 +2,14 @@
 {% extends "base.html" %}
 
 {% block main %}
-    <div id="signinButton">
+
+    <div class="d-flex align-items-center flex-column" style="height: 200px;">
+        <div class="p-2"><img class="img-fluid" src="{{ url_for('static', filename='img/loginImage.svg') }}"
+                              alt="Login Image not found"
+                              width="300px" height="300px"></div>
+        <div class="p-2"><h1 class="display-3">Item Catalog</h1></div>
+        <div class="mt-auto p-2">
+            <div id="signinButton">
     <span class="g-signin"
           data-scope="openid email"
           data-clientid="442410577685-lela4tk7e3lqsl47g45u7dlhrgjuieeh.apps.googleusercontent.com"
@@ -12,6 +19,8 @@
           data-callback="signInCallBack"
           data-approvalprompt="force">
     </span>
+            </div>
+        </div>
     </div>
 
     <div id="result"></div>
