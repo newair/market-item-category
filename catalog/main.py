@@ -282,7 +282,8 @@ def add_item(cat_id=None):
             name = request.form["name"]
             description = request.form["description"]
             image_name = save_image(request)
-            new_item = Item(name=name, description=description, cat_id=cat_id, user_id=login_session['user_id'], image_name=image_name)
+            new_item = Item(name=name, description=description, cat_id=cat_id, user_id=login_session['user_id'],
+                            image_name=image_name)
             session.add(new_item)
             session.commit()
             return redirect('/')
@@ -329,6 +330,8 @@ def delete_item(item_id):
             if request.method == 'GET':
                 return render_template_with_session("delete_item.html", item=item)
             else:
+                # First remove the image then remove the database entry
+                os.remove(os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], item.image_name))
                 session.delete(item)
                 session.commit()
         else:
@@ -359,8 +362,8 @@ def add_category():
         return render_template_with_session("add_category.html")
     else:
         name = request.form["name"]
-        newItem = Category(name=name, user_id=login_session['user_id'])
-        session.add(newItem)
+        new_item = Category(name=name, user_id=login_session['user_id'])
+        session.add(new_item)
         session.commit()
         return redirect(url_for("index"))
 
