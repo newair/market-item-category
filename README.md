@@ -1,6 +1,6 @@
 Online Market Item Catalog  Amila Ishara (Udacity)
 
-This application is hosted in heroku. Use this [URL](https://item-catalog-1.herokuapp.com) to access.
+This application is hosted in heroku. Use this [URL](https://item-catalog-1.herokuapp.com) to access
 
 ## Introduction
 This project contains source code for item caltalog project which implements CRUD operations of item categories and sub categories authenticated by 3rd party authentication systems.
